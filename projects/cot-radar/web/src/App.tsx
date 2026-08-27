@@ -106,7 +106,7 @@ function MarketCard({
         </div>
         <StateBadge state={market.state} />
       </div>
-      <p className="state-label">{stateLabels[market.state] ?? market.state}</p>
+      <p className="state-label">{stateLabels[market.state] ?? "自訂規則狀態"}</p>
       <div className="metric-grid">
         <div>
           <span>Leveraged Funds 百分位</span>
