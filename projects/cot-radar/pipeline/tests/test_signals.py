@@ -34,7 +34,7 @@ def test_long_extreme_must_exit_before_confirmation() -> None:
         unwind_memory_weeks=4,
     )
     positions = _positions([50, 92, 85, 80], [1.0, 4.0, 3.0, 2.0])
-    prices = _prices([100, 102, 104, 103, 99, 96])
+    prices = _prices([100, 102, 104, 103, 99, 96, 92])
 
     result = classify_states(positions, prices, settings)
 
