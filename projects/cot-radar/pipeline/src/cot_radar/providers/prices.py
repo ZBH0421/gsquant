@@ -101,7 +101,8 @@ class YahooFinanceProvider:
             raise DataContractError("Yahoo Finance response has no chart object")
         results = chart.get("result")
         if not isinstance(results, list) or not results or not isinstance(results[0], dict):
-            raise DataContractError(f"Yahoo Finance returned no weekly series: {chart.get('error')}")
+            error = chart.get("error")
+            raise DataContractError(f"Yahoo Finance returned no weekly series: {error}")
         series = cast(dict[str, Any], results[0])
         timestamps = series.get("timestamp")
         indicators = series.get("indicators")
