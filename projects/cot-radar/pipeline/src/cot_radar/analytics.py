@@ -7,7 +7,6 @@ from gs_quant.timeseries import diff as gs_diff
 from cot_radar.config import RadarSettings
 from cot_radar.models import DataContractError
 
-
 POSITION_CATEGORIES = (
     "leveraged",
     "asset_manager",
