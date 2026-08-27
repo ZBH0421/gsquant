@@ -15,7 +15,6 @@ from cot_radar.config import RadarSettings
 from cot_radar.models import DataContractError
 from cot_radar.narratives import build_evidence
 
-
 ARTIFACT_NAMES = {
     "dashboard.json",
     "history.json",
