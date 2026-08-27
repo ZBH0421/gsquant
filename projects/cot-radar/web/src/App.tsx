@@ -255,7 +255,7 @@ function MarketChart({ symbol, rows }: { symbol: "ES" | "NQ"; rows: HistoryRow[]
           yaxis: { title: { text: "淨部位／OI (%)" }, gridcolor: "#172a35", zerolinecolor: "#38505e" },
           yaxis2: {
             title: { text: "百分位" },
-            overlaying: "y",
+            overlaying: "y" as never,
             side: "right",
             range: [0, 100],
             showgrid: false,
