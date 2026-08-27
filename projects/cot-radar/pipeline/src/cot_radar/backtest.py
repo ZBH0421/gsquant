@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -8,7 +9,7 @@ import pandas as pd
 from cot_radar.models import DataContractError
 
 
-def _local_date(value: object) -> pd.Timestamp:
+def _local_date(value: Any) -> pd.Timestamp:
     timestamp = pd.Timestamp(value)
     if timestamp.tzinfo is not None:
         timestamp = timestamp.tz_convert("America/New_York").tz_localize(None)
