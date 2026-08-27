@@ -16,13 +16,14 @@ from cot_radar.providers.prices import (
     AutoPriceProvider,
     PriceResult,
     StooqProvider,
+    YahooFinanceProvider,
 )
 
 
 class SinglePriceProvider:
     def __init__(
         self,
-        provider: AlphaVantageProvider | StooqProvider,
+        provider: AlphaVantageProvider | StooqProvider | YahooFinanceProvider,
         name: str,
     ) -> None:
         self.provider = provider
@@ -68,8 +69,9 @@ def _prices(name: str, http: HttpClient) -> PriceLike:
     key = os.getenv("ALPHA_VANTAGE_API_KEY", "")
     alpha = AlphaVantageProvider(http, key) if key else None
     stooq = StooqProvider(http)
+    yahoo = YahooFinanceProvider(http)
     if name == "auto":
-        return AutoPriceProvider(alpha, stooq)
+        return AutoPriceProvider(alpha, stooq, yahoo)
     if name == "alpha_vantage":
         if alpha is None:
             raise SystemExit("ALPHA_VANTAGE_API_KEY is required for alpha_vantage")
