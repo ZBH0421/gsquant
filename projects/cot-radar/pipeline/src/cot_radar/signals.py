@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import pandas as pd
 from gs_quant.timeseries import diff as gs_diff
@@ -30,7 +32,7 @@ def _price_features(prices: pd.DataFrame, settings: RadarSettings) -> pd.DataFra
     return result
 
 
-def _local_release_date(value: object) -> pd.Timestamp:
+def _local_release_date(value: Any) -> pd.Timestamp:
     timestamp = pd.Timestamp(value)
     if timestamp.tzinfo is not None:
         timestamp = timestamp.tz_convert("America/New_York").tz_localize(None)
