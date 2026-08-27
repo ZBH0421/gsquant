@@ -19,7 +19,8 @@ def _price_features(prices: pd.DataFrame, settings: RadarSettings) -> pd.DataFra
         result["close"].to_numpy(dtype=float),
         index=pd.DatetimeIndex(result["date"]),
     )
-    result["price_sma"] = moving_average(indexed, settings.price_sma_weeks).to_numpy()
+    sma = moving_average(indexed, settings.price_sma_weeks).reindex(indexed.index)
+    result["price_sma"] = sma.to_numpy()
     change = gs_diff(indexed, settings.price_momentum_weeks)
     result["price_momentum"] = (
         change / indexed.shift(settings.price_momentum_weeks)
