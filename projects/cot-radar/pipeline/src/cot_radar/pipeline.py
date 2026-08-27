@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Protocol
 
 import pandas as pd
@@ -41,8 +42,8 @@ def run_pipeline(
     cftc: CftcLike,
     prices: PriceLike,
     notes: list[dict[str, str]],
-    derived_output: object,
-    web_output: object,
+    derived_output: Path,
+    web_output: Path,
     generated_at: pd.Timestamp,
 ) -> PipelineResult:
     raw_positions = cftc.fetch()
@@ -94,11 +95,7 @@ def run_pipeline(
         notes=notes,
     )
 
-    from pathlib import Path
-
-    derived_path = Path(derived_output)
-    web_path = Path(web_output)
-    count = write_artifacts(artifacts, derived_path)
-    write_artifacts(artifacts, web_path)
+    count = write_artifacts(artifacts, derived_output)
+    write_artifacts(artifacts, web_output)
     latest = pd.Timestamp(signals["report_date"].max()).date().isoformat()
     return PipelineResult(count, latest, provider_name)
