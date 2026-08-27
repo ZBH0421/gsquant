@@ -21,3 +21,19 @@ jobs:
       - run: python -m pytest projects/cot-radar/pipeline/tests -q
       - run: python -m ruff check projects/cot-radar/pipeline/src projects/cot-radar/pipeline/tests
       - run: python -m mypy projects/cot-radar/pipeline/src
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projects/cot-radar/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: projects/cot-radar/web/package.json
+      - run: npm install
+      - run: npm test -- --run
+      - run: npm run build
