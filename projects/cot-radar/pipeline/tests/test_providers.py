@@ -11,6 +11,7 @@ from cot_radar.providers.prices import (
     AutoPriceProvider,
     PriceResult,
     StooqProvider,
+    YahooFinanceProvider,
 )
 
 
@@ -119,3 +120,48 @@ def test_auto_provider_falls_back_and_reports_source() -> None:
     assert result.provider == "stooq"
     assert not result.frame.empty
     assert pd.api.types.is_datetime64_any_dtype(result.frame["date"])
+
+
+class FakeYahooHttp:
+    def get_json(self, url: str, params: dict[str, str | int]) -> Any:
+        assert "query1.finance.yahoo.com" in url
+        assert params["interval"] == "1wk"
+        return {
+            "chart": {
+                "result": [
+                    {
+                        "timestamp": [1786665600, 1787270400],
+                        "indicators": {
+                            "quote": [{"close": [645.0, 650.25]}],
+                        },
+                    }
+                ],
+                "error": None,
+            }
+        }
+
+    def get_text(
+        self,
+        url: str,
+        params: dict[str, str | int] | None = None,
+    ) -> str:
+        return "upstream unavailable"
+
+
+def test_yahoo_finance_parses_keyless_weekly_close() -> None:
+    frame = YahooFinanceProvider(FakeYahooHttp()).fetch("SPY")
+
+    assert list(frame.columns) == ["date", "close"]
+    assert frame.iloc[-1]["close"] == pytest.approx(650.25)
+
+
+def test_auto_provider_falls_through_invalid_stooq_payload() -> None:
+    http = FakeYahooHttp()
+    result = AutoPriceProvider(
+        None,
+        StooqProvider(http),
+        YahooFinanceProvider(http),
+    ).fetch("QQQ")
+
+    assert result.provider == "yahoo_finance"
+    assert len(result.frame) == 2
