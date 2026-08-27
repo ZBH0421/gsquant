@@ -143,6 +143,7 @@ class AutoPriceProvider:
         try:
             return PriceResult(self.stooq.fetch(symbol), "stooq")
         except DataContractError:
-            if self.yahoo_finance is None:
+            fallback = self.yahoo_finance
+            if fallback is None:
                 raise
-        return PriceResult(self.yahoo_finance.fetch(symbol), "yahoo_finance")
+        return PriceResult(fallback.fetch(symbol), "yahoo_finance")
