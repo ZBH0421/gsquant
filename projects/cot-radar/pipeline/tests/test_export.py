@@ -64,3 +64,21 @@ def test_failed_write_preserves_previous_snapshot(tmp_path: Path) -> None:
         write_artifacts({"dashboard.json": {"markets": [{"symbol": "ES"}]}}, tmp_path)
 
     assert (tmp_path / "dashboard.json").read_bytes() == before
+
+
+def test_artifact_json_converts_pandas_nat_to_null(tmp_path: Path) -> None:
+    signals = _signals()
+    signals["unavailable_date"] = pd.NaT
+    artifacts = build_artifacts(
+        signals,
+        pd.DataFrame(),
+        RadarSettings.for_tests(),
+        price_provider="yahoo_finance",
+        generated_at=pd.Timestamp("2026-08-22T00:00:00Z"),
+        notes=[],
+    )
+
+    write_artifacts(artifacts, tmp_path)
+
+    payload = json.loads((tmp_path / "signals.json").read_text())
+    assert payload["signals"][0]["unavailable_date"] is None
