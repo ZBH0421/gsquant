@@ -2,7 +2,6 @@ from pathlib import Path
 
 from cot_radar.config import load_settings
 
-
 SETTINGS = Path("projects/cot-radar/config/settings.yaml")
 
 
