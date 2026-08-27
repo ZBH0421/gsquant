@@ -11,7 +11,7 @@ from cot_radar.config import RadarSettings
 from cot_radar.models import DataContractError, Evidence
 
 
-def _number(value: object, digits: int = 1) -> str:
+def _number(value: Any, digits: int = 1) -> str:
     if value is None or pd.isna(value):
         return "資料不足"
     return f"{float(value):.{digits}f}"
@@ -20,7 +20,7 @@ def _number(value: object, digits: int = 1) -> str:
 def build_evidence(snapshot: Mapping[str, object], settings: RadarSettings) -> Evidence:
     symbol = str(snapshot["symbol"])
     state = str(snapshot["state"])
-    report_date = pd.Timestamp(snapshot["report_date"]).date().isoformat()
+    report_date = pd.Timestamp(cast(Any, snapshot["report_date"])).date().isoformat()
     percentile = _number(snapshot.get("leveraged_percentile"))
     net_pct = _number(snapshot.get("leveraged_net_pct_oi"))
     weekly_change = _number(snapshot.get("leveraged_weekly_change"))
