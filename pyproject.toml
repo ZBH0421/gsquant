@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "macro-radar"
+version = "0.1.0"
+description = "Traceable CFTC positioning and reversal-risk research"
+requires-python = ">=3.11"
+dependencies = [
+  "gs-quant==2.1.6",
+  "httpx==0.28.1",
+  "numpy>=2.1,<2.4",
+  "pandas>=2.2,<3",
+  "PyYAML>=6,<7",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.15,<2",
+  "pandas-stubs>=2.2,<3",
+  "pytest>=8.3,<9",
+  "pytest-cov>=6,<7",
+  "ruff>=0.11,<1",
+]
+
+[project.scripts]
+cot-radar = "cot_radar.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["projects/cot-radar/pipeline/src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["projects/cot-radar/pipeline/src"]
+testpaths = ["projects/cot-radar/pipeline/tests"]
+addopts = "--strict-markers --strict-config"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_ignores = true
+files = ["projects/cot-radar/pipeline/src"]
