@@ -4,8 +4,8 @@ from pathlib import Path
 import pandas as pd
 
 from cot_radar.config import RadarSettings
-from cot_radar.models import PriceResult
 from cot_radar.pipeline import run_pipeline
+from cot_radar.providers.prices import PriceResult
 
 
 class FakeCftc:
