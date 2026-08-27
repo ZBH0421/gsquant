@@ -24,7 +24,7 @@ def _normalize_prices(frame: pd.DataFrame) -> pd.DataFrame:
     result = frame[["date", "close"]].copy()
     result["date"] = pd.to_datetime(result["date"], errors="coerce").dt.normalize()
     result["close"] = pd.to_numeric(result["close"], errors="coerce")
-    if result.isna().any().any() or (result["close"] <= 0).any():
+    if result.empty or result.isna().any().any() or (result["close"] <= 0).any():
         raise DataContractError("price data contains invalid dates or closes")
     return result.drop_duplicates("date", keep="last").sort_values("date", ignore_index=True)
 
@@ -76,14 +76,63 @@ class StooqProvider:
         return _normalize_prices(raw.rename(columns={"Date": "date", "Close": "close"}))
 
 
+class YahooFinanceProvider:
+    SYMBOLS = {"SPY", "QQQ"}
+
+    def __init__(self, http: HttpLike) -> None:
+        self.http = http
+
+    def fetch(self, symbol: str) -> pd.DataFrame:
+        if symbol not in self.SYMBOLS:
+            raise DataContractError(f"Yahoo Finance proxy symbol is unsupported: {symbol}")
+        payload = self.http.get_json(
+            f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}",
+            {
+                "range": "max",
+                "interval": "1wk",
+                "events": "history",
+                "includeAdjustedClose": "true",
+            },
+        )
+        if not isinstance(payload, dict):
+            raise DataContractError("Yahoo Finance response must be an object")
+        chart = cast(dict[str, Any], payload).get("chart")
+        if not isinstance(chart, dict):
+            raise DataContractError("Yahoo Finance response has no chart object")
+        results = chart.get("result")
+        if not isinstance(results, list) or not results or not isinstance(results[0], dict):
+            raise DataContractError(f"Yahoo Finance returned no weekly series: {chart.get('error')}")
+        series = cast(dict[str, Any], results[0])
+        timestamps = series.get("timestamp")
+        indicators = series.get("indicators")
+        if not isinstance(timestamps, list) or not isinstance(indicators, dict):
+            raise DataContractError("Yahoo Finance weekly series is malformed")
+        quotes = indicators.get("quote")
+        if not isinstance(quotes, list) or not quotes or not isinstance(quotes[0], dict):
+            raise DataContractError("Yahoo Finance weekly quotes are missing")
+        closes = cast(dict[str, Any], quotes[0]).get("close")
+        if not isinstance(closes, list) or len(closes) != len(timestamps):
+            raise DataContractError("Yahoo Finance timestamps and closes do not align")
+
+        dates = pd.to_datetime(timestamps, unit="s", utc=True, errors="coerce")
+        rows = [
+            {"date": date.tz_convert(None), "close": close}
+            for date, close in zip(dates, closes, strict=True)
+            if pd.notna(date) and close is not None
+        ]
+        return _normalize_prices(pd.DataFrame(rows))
+
+
 class AutoPriceProvider:
     def __init__(
         self,
         alpha_vantage: AlphaVantageProvider | None,
         stooq: StooqProvider,
+        yahoo_finance: YahooFinanceProvider | None = None,
     ) -> None:
         self.alpha_vantage = alpha_vantage
         self.stooq = stooq
+        self.yahoo_finance = yahoo_finance
 
     def fetch(self, symbol: str) -> PriceResult:
         if self.alpha_vantage is not None:
@@ -91,4 +140,9 @@ class AutoPriceProvider:
                 return PriceResult(self.alpha_vantage.fetch(symbol), "alpha_vantage")
             except DataContractError:
                 pass
-        return PriceResult(self.stooq.fetch(symbol), "stooq")
+        try:
+            return PriceResult(self.stooq.fetch(symbol), "stooq")
+        except DataContractError:
+            if self.yahoo_finance is None:
+                raise
+        return PriceResult(self.yahoo_finance.fetch(symbol), "yahoo_finance")
