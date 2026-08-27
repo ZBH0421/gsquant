@@ -26,7 +26,9 @@ class FakeCftcHttp:
                     "cftc_contract_market_code": "13874+",
                 },
                 {
-                    "market_and_exchange_names": "NASDAQ-100 Consolidated - CHICAGO MERCANTILE EXCHANGE",
+                    "market_and_exchange_names": (
+                        "NASDAQ-100 Consolidated - CHICAGO MERCANTILE EXCHANGE"
+                    ),
                     "cftc_contract_market_code": "20974+",
                 },
             ]
@@ -71,8 +73,16 @@ class FakePriceHttp:
             }
         }
 
-    def get_text(self, url: str, params: dict[str, str | int] | None = None) -> str:
-        return "Date,Open,High,Low,Close,Volume\n2026-08-14,1,2,1,645.0,10\n2026-08-21,1,2,1,650.0,10\n"
+    def get_text(
+        self,
+        url: str,
+        params: dict[str, str | int] | None = None,
+    ) -> str:
+        return (
+            "Date,Open,High,Low,Close,Volume\n"
+            "2026-08-14,1,2,1,645.0,10\n"
+            "2026-08-21,1,2,1,650.0,10\n"
+        )
 
 
 def test_cftc_resolves_configured_market_patterns() -> None:
