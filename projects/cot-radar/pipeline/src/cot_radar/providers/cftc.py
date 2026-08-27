@@ -8,7 +8,6 @@ from cot_radar.config import RadarSettings
 from cot_radar.models import DataContractError
 from cot_radar.providers.http import HttpLike
 
-
 FIELD_MAP = {
     "report_date_as_yyyy_mm_dd": "report_date",
     "market_and_exchange_names": "market_name",
@@ -68,7 +67,10 @@ class CftcProvider:
         return resolved
 
     def _download_rows(self, contract_codes: set[str]) -> list[dict[str, Any]]:
-        quoted = ",".join(f"'{code.replace(chr(39), chr(39) * 2)}'" for code in sorted(contract_codes))
+        quoted = ",".join(
+            "'" + code.replace("'", "''") + "'"
+            for code in sorted(contract_codes)
+        )
         rows: list[dict[str, Any]] = []
         offset = 0
         while True:
