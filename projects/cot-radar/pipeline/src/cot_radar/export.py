@@ -6,7 +6,7 @@ import shutil
 import tempfile
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -75,7 +75,8 @@ def build_artifacts(
         raise DataContractError("signals must contain ES and NQ")
     current = signals.sort_values("report_date").groupby("symbol", sort=True).tail(1)
     markets: list[dict[str, Any]] = []
-    for snapshot in current.to_dict(orient="records"):
+    for raw_snapshot in current.to_dict(orient="records"):
+        snapshot = cast(dict[str, Any], raw_snapshot)
         evidence = asdict(build_evidence(snapshot, settings))
         market = _clean(snapshot)
         market["display_name"] = settings.markets[str(snapshot["symbol"])].display_name
