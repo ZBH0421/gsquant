@@ -22,6 +22,7 @@ dev = [
   "pytest>=8.3,<9",
   "pytest-cov>=6,<7",
   "ruff>=0.11,<1",
+  "types-PyYAML>=6,<7",
 ]
 
 [project.scripts]
@@ -48,3 +49,7 @@ python_version = "3.11"
 strict = true
 warn_unused_ignores = true
 files = ["projects/cot-radar/pipeline/src"]
+
+[[tool.mypy.overrides]]
+module = ["gs_quant.*"]
+ignore_missing_imports = true
