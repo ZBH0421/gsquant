@@ -141,6 +141,9 @@ function MarketCard({
         </div>
       </div>
       <div className="proxy-line">價格確認：{proxy} 代理（非 {market.symbol} 期貨結算價）</div>
+      {market.market_name && (
+        <div className="proxy-line">CFTC 官方市場：{market.market_name}</div>
+      )}
       <button className="text-button" onClick={onSelect} aria-pressed={active}>
         查看證據鏈 <span aria-hidden="true">→</span>
       </button>
@@ -291,7 +294,7 @@ function BacktestView({ data }: { data: BacktestData }) {
         </div>
       </div>
       <p className="section-intro">
-        報酬從 COT 實際可得後的第一個週線價格開始計算，避免把週二部位提前視為已知。
+        報酬從 COT 正常排程可得後的第一個週線價格開始計算；假日或營運延遲未逐筆重建，延遲週的結果可能偏樂觀。
       </p>
       {rows.length === 0 ? (
         <div className="empty-state">現有資料尚無足夠的完整訊號樣本；系統不會用不足樣本製造結論。</div>
@@ -327,7 +330,7 @@ function MethodView({ status }: { status: StatusData }) {
         <div><span className="eyebrow">METHODOLOGY</span><h2>方法與資料</h2></div>
       </div>
       <div className="method-grid">
-        <article><span>01</span><h3>資料口徑</h3><p>CFTC TFF Futures Only；週二部位通常週五發布。系統以實際可得時間對齊價格，避免偷看未發布資料。</p></article>
+        <article><span>01</span><h3>資料口徑</h3><p>CFTC TFF Futures Only；週二部位通常週五發布。系統使用排定發布時間對齊價格；假日或營運延遲可能使實際發布更晚，歷史驗證未逐筆重建例外發布時間。</p></article>
         <article><span>02</span><h3>擁擠衡量</h3><p>Leveraged Funds 淨部位除以總 OI，使用 156 週 prior-only 歷史窗計算百分位；當期值不進入自己的參考分布。</p></article>
         <article><span>03</span><h3>狀態機</h3><p>第 90／10 百分位定義 EXTREME；退出極端且部位反向變化為 UNWINDING；代理價格的 10 週均線與 4 週動能共同確認。</p></article>
         <article><span>04</span><h3>價格代理</h3><p>ES 使用 SPY、NQ 使用 QQQ。它們只用於週頻方向確認，不等同 ES／NQ 期貨結算價，也不作精確損益回測。</p></article>
