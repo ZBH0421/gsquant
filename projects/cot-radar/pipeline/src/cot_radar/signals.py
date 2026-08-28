@@ -91,15 +91,16 @@ def classify_states(
             reports_since_extreme = 0
         else:
             reports_since_extreme += 1
+            if reports_since_extreme > settings.unwind_memory_weeks:
+                last_extreme = None
+
             change = np.nan if previous_net is None else net - previous_net
             is_unwind = (
                 last_extreme == "long"
-                and reports_since_extreme <= settings.unwind_memory_weeks
                 and np.isfinite(change)
                 and change < 0
             ) or (
                 last_extreme == "short"
-                and reports_since_extreme <= settings.unwind_memory_weeks
                 and np.isfinite(change)
                 and change > 0
             )
@@ -115,13 +116,16 @@ def classify_states(
                     if pd.notna(row.get("price_momentum"))
                     else np.nan
                 )
-                if reports_since_extreme >= 2 and np.isfinite(
-                    [price, price_sma, momentum]
-                ).all():
+                has_price_confirmation = (
+                    reports_since_extreme >= settings.confirmation_delay_weeks
+                    and np.isfinite([price, price_sma, momentum]).all()
+                )
+                if has_price_confirmation:
                     if direction == "long" and price < price_sma and momentum < 0:
                         state = "CONFIRMED_BEARISH"
                     elif direction == "short" and price > price_sma and momentum > 0:
                         state = "CONFIRMED_BULLISH"
+
         previous_net = net
         states.append(state)
         directions.append(direction)
