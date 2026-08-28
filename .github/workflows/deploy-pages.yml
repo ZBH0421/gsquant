@@ -14,6 +14,11 @@ on:
       - opened
       - synchronize
       - reopened
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
   issues:
     types:
       - opened
@@ -29,7 +34,7 @@ concurrency:
 
 jobs:
   verify-build-deploy:
-    if: (github.event_name != 'issues' || github.event.issue.title == 'Deploy COT Radar') && (github.event_name != 'pull_request' || github.head_ref == 'codex/deploy-cot-radar')
+    if: (github.event_name != 'issues' || github.event.issue.title == 'Deploy COT Radar') && (github.event_name != 'pull_request' || github.head_ref == 'codex/deploy-cot-radar') && (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'codex/deploy-cot-radar'))
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}cot-radar/
