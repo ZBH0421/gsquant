@@ -38,6 +38,8 @@ jobs:
           python -m ruff check projects/cot-radar/pipeline/src projects/cot-radar/pipeline/tests
           python -m mypy projects/cot-radar/pipeline/src
       - name: Generate and validate current data
+        id: refresh
+        continue-on-error: true
         env:
           ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
         run: |
@@ -48,8 +50,50 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+
           dashboard = json.loads(Path("projects/cot-radar/data/derived/dashboard.json").read_text())
+          status = json.loads(Path("projects/cot-radar/web/public/data/status.json").read_text())
           assert {market["symbol"] for market in dashboard["markets"]} == {"ES", "NQ"}
+          assert set(dashboard["comparison"]["markets"]) == {"ES", "NQ"}
+          assert status["cftc_dataset"] == "gpe5-46if"
+          assert status["scheduled_release_at"]
+          assert status["last_successful_update_at"]
+          assert status["next_scheduled_update_at"]
+          assert status["publication_state"] in {"current", "waiting_for_cftc", "stale"}
+          PY
+      - name: Publish refresh failure warning while preserving last good data
+        if: steps.refresh.outcome == 'failure'
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          now = datetime.now(timezone.utc).isoformat()
+          paths = [
+              Path("projects/cot-radar/data/derived/status.json"),
+              Path("projects/cot-radar/web/public/data/status.json"),
+          ]
+          patched = None
+          for path in paths:
+              status = json.loads(path.read_text(encoding="utf-8"))
+              status["last_update_attempt_at"] = now
+              status["last_update_succeeded"] = False
+              status["warning"] = (
+                  "最近一次 GitHub Actions 自動更新失敗；目前仍顯示最後一次成功資料。"
+                  "請以 CFTC 官方資料與下一次排程更新為準。"
+              )
+              path.write_text(json.dumps(status, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+              patched = status
+
+          dashboard_paths = [
+              Path("projects/cot-radar/data/derived/dashboard.json"),
+              Path("projects/cot-radar/web/public/data/dashboard.json"),
+          ]
+          for path in dashboard_paths:
+              dashboard = json.loads(path.read_text(encoding="utf-8"))
+              dashboard["data_status"] = patched
+              path.write_text(json.dumps(dashboard, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
           PY
       - name: Commit validated weekly snapshot
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -69,7 +113,8 @@ jobs:
         run: |
           npm install
           npm test -- --run
-          npm run build
+          npx tsc -b --pretty false
+          npx vite build
       - name: Assemble Pages artifact
         run: |
           mkdir -p pages/cot-radar
@@ -83,3 +128,8 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Fail workflow after publishing refresh warning
+        if: steps.refresh.outcome == 'failure'
+        run: |
+          echo "Data refresh failed; Pages was deployed with the prior successful snapshot and a visible warning."
+          exit 1
