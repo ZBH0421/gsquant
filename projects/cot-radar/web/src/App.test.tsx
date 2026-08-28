@@ -17,6 +17,7 @@ const dashboard = {
     {
       symbol: "ES",
       display_name: "E-mini S&P 500",
+      market_name: "S&P 500 Consolidated - CHICAGO MERCANTILE EXCHANGE",
       proxy_symbol: "SPY",
       report_date: "2026-08-18",
       available_at: "2026-08-21T19:30:00Z",
@@ -42,6 +43,7 @@ const dashboard = {
     {
       symbol: "NQ",
       display_name: "E-mini Nasdaq-100",
+      market_name: "NASDAQ MINI - CHICAGO MERCANTILE EXCHANGE",
       proxy_symbol: "QQQ",
       report_date: "2026-08-18",
       available_at: "2026-08-21T19:30:00Z",
@@ -99,6 +101,7 @@ describe("COT Radar", () => {
     expect(screen.getByText(/截至 2026-08-18，ES 槓桿基金/)).toBeInTheDocument();
     expect(screen.getByText("確認與失效條件")).toBeInTheDocument();
     expect(screen.getByText(/SPY.*代理/)).toBeInTheDocument();
+    expect(screen.getByText(/CFTC 官方市場：S&P 500 Consolidated/)).toBeInTheDocument();
   });
 
   it("navigates to historical validation and methodology", async () => {
@@ -112,5 +115,6 @@ describe("COT Radar", () => {
     await user.click(screen.getByRole("button", { name: "方法與資料" }));
     await waitFor(() => expect(screen.getByText(/prior-only/)).toBeInTheDocument());
     expect(screen.getByText(/週二部位.*週五發布/)).toBeInTheDocument();
+    expect(screen.getByText(/排定發布時間.*假日或營運延遲/)).toBeInTheDocument();
   });
 });
