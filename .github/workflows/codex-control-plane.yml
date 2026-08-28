@@ -138,6 +138,30 @@ jobs:
       - name: Remove local task envelope
         run: rm -rf .codex
 
+      - name: Enforce controller-owned path boundary
+        env:
+          TASK_BODY: ${{ github.event.issue.body }}
+        run: |
+          set -euo pipefail
+          if grep -Fq "ALLOW_CONTROL_PLANE_CHANGES: true" <<<"$TASK_BODY"; then
+            echo "Explicit controller authorization allows control-plane changes for this task."
+            exit 0
+          fi
+
+          violation=0
+          while IFS= read -r path; do
+            case "$path" in
+              .github/workflows/codex-control-plane.yml|.github/ISSUE_TEMPLATE/codex-task.yml|AGENTS.md|scripts/codex/*|tests/control_plane/*|docs/codex-control-plane.md)
+                echo "Protected control-plane path modified without authorization: $path" >&2
+                violation=1
+                ;;
+            esac
+          done < <({ git diff --name-only HEAD; git ls-files --others --exclude-standard; } | sort -u)
+
+          if [[ "$violation" -ne 0 ]]; then
+            exit 1
+          fi
+
       - name: Deterministic verification
         run: bash scripts/codex/verify.sh
 
@@ -316,6 +340,30 @@ jobs:
 
       - name: Remove local task envelope
         run: rm -rf .codex
+
+      - name: Enforce controller-owned path boundary
+        env:
+          FIX_REQUEST: ${{ github.event.comment.body }}
+        run: |
+          set -euo pipefail
+          if grep -Fq "ALLOW_CONTROL_PLANE_CHANGES: true" <<<"$FIX_REQUEST"; then
+            echo "Explicit controller authorization allows control-plane changes for this repair turn."
+            exit 0
+          fi
+
+          violation=0
+          while IFS= read -r path; do
+            case "$path" in
+              .github/workflows/codex-control-plane.yml|.github/ISSUE_TEMPLATE/codex-task.yml|AGENTS.md|scripts/codex/*|tests/control_plane/*|docs/codex-control-plane.md)
+                echo "Protected control-plane path modified without authorization: $path" >&2
+                violation=1
+                ;;
+            esac
+          done < <({ git diff --name-only HEAD; git ls-files --others --exclude-standard; } | sort -u)
+
+          if [[ "$violation" -ne 0 ]]; then
+            exit 1
+          fi
 
       - name: Deterministic verification
         run: bash scripts/codex/verify.sh
