@@ -1,0 +1,144 @@
+.status-panel,
+.comparison-panel {
+  margin-bottom: 18px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  background: rgba(10, 23, 31, .9);
+}
+
+.compact-heading { margin-bottom: 16px; }
+.publication-badge {
+  padding: 7px 10px;
+  border: 1px solid rgba(56, 232, 198, .28);
+  color: var(--green);
+  background: rgba(56, 232, 198, .05);
+  font: 500 10px "IBM Plex Mono", monospace;
+}
+.publication-badge.stale {
+  color: var(--amber);
+  border-color: rgba(245, 184, 90, .35);
+  background: rgba(245, 184, 90, .05);
+}
+.status-warning {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-left: 2px solid var(--amber);
+  background: rgba(245, 184, 90, .05);
+  color: #c8b083;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+.status-grid > div {
+  min-width: 0;
+  padding: 15px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.status-grid span,
+.status-grid small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+.status-grid strong {
+  display: block;
+  margin-top: 7px;
+  color: #e4f0f4;
+  overflow-wrap: anywhere;
+  font: 500 11px "IBM Plex Mono", monospace;
+}
+.status-grid small { margin-top: 4px; color: #5f7885; }
+
+.comparison-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+.comparison-summary span {
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  background: #0a1720;
+  color: #a9bdc7;
+  font: 500 10px "IBM Plex Mono", monospace;
+}
+.comparison-table td:first-child { font-family: "Noto Sans TC", sans-serif; color: var(--muted); }
+.comparison-table td:nth-child(2) { color: var(--green); }
+.comparison-table td:nth-child(3) { color: #8fa6ff; }
+.divergence-chain {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+.divergence-chain article { padding: 17px; background: #0a1720; }
+.divergence-chain span { color: var(--amber); font: 500 10px "IBM Plex Mono", monospace; }
+.divergence-chain p { margin: 8px 0 0; color: var(--muted); font-size: 12px; line-height: 1.75; }
+
+.chart-note { margin: 7px 0 0; color: #647c88; font-size: 10px; }
+.method-warning-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin-bottom: 18px;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+.method-warning-grid p {
+  margin: 0;
+  padding: 16px;
+  background: #0a1720;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.75;
+}
+.small-sample {
+  display: block;
+  margin-top: 5px;
+  color: var(--amber);
+  font: 500 9px "IBM Plex Mono", monospace;
+}
+
+.rules-section { margin-top: 28px; }
+.rules-table td { white-space: normal; min-width: 180px; line-height: 1.65; font-family: "Noto Sans TC", sans-serif; }
+.rules-table td:first-child { min-width: 170px; }
+.rules-table .state-badge { margin: 0; }
+.source-card small { display: block; margin-top: 5px; color: #5e7682; font-size: 9px; }
+.download-card {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: #0a1720;
+}
+.download-card > span { color: var(--muted); font-size: 10px; }
+.download-card div { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 10px; }
+.download-card a { font: 500 11px "IBM Plex Mono", monospace; }
+.download-card p { margin: 10px 0 0; color: #607783; font-size: 10px; }
+
+.market-grid { margin-top: 18px; }
+.market-page { padding: 0; border: 0; background: transparent; }
+.market-page > .evidence-panel { margin-top: 18px; }
+
+@media (max-width: 980px) {
+  .status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .method-warning-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 720px) {
+  .status-panel,
+  .comparison-panel { padding: 20px; }
+  .status-grid,
+  .divergence-chain { grid-template-columns: 1fr; }
+  .comparison-summary { display: grid; grid-template-columns: 1fr; }
+  .status-grid strong { font-size: 10px; }
+  .rules-table td { min-width: 160px; }
+}
