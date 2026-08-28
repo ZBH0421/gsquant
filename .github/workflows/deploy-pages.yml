@@ -5,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: "0 0 * * 6"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
   pull_request_target:
     branches:
