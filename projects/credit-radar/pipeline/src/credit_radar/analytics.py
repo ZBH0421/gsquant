@@ -24,7 +24,7 @@ def _moving_average(series: pd.Series, window: int) -> pd.Series:
         pd.to_numeric(series, errors="coerce").to_numpy(dtype=float),
         index=pd.date_range("2000-01-01", periods=len(series), freq="D"),
     )
-    calculated = gs_moving_average(indexed, window)
+    calculated = gs_moving_average(indexed, window).reindex(indexed.index)
     return pd.Series(calculated.to_numpy(dtype=float), index=series.index)
 
 
