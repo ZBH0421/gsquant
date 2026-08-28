@@ -117,4 +117,32 @@ describe("COT Radar", () => {
     expect(screen.getByText(/週二部位.*週五發布/)).toBeInTheDocument();
     expect(screen.getByText(/排定發布時間.*假日或營運延遲/)).toBeInTheDocument();
   });
+
+  it("keeps a timezone-naive CFTC timestamp on its stated calendar date", async () => {
+    const originalTimezone = process.env.TZ;
+    process.env.TZ = "Asia/Taipei";
+    const liveStatus = {
+      ...status,
+      latest_report_date: "2026-08-18T00:00:00",
+    };
+    vi.stubGlobal("fetch", vi.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+      const value = url.includes("dashboard")
+        ? dashboard
+        : url.includes("history")
+          ? history
+          : url.includes("backtest")
+            ? backtest
+            : liveStatus;
+      return Promise.resolve(new Response(JSON.stringify(value), { status: 200 }));
+    }));
+
+    try {
+      render(<App />);
+      expect(await screen.findByText("2026年8月18日")).toBeInTheDocument();
+    } finally {
+      if (originalTimezone === undefined) delete process.env.TZ;
+      else process.env.TZ = originalTimezone;
+    }
+  });
 });
