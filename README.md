@@ -25,7 +25,7 @@ python -m pip install -e ".[dev]"
 python -m cot_radar.cli --price-provider stooq
 ```
 
-若設定 `ALPHA_VANTAGE_API_KEY`，可使用 `--price-provider auto` 優先取得 Alpha Vantage 的 SPY／QQQ 週線資料；失敗時會自動降級至 Stooq。
+若設定 `ALPHA_VANTAGE_API_KEY`，`--price-provider auto` 會優先使用 Alpha Vantage；未設定或來源失敗時，依序嘗試 Stooq 與 Yahoo Finance 的 SPY／QQQ 週線。所有來源都經相同資料契約驗證，網站會顯示實際採用者。
 
 ### 本機啟動網站
 
