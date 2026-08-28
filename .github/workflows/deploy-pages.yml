@@ -7,6 +7,13 @@ on:
   schedule:
     - cron: "0 0 * * 6"
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
   issues:
     types:
       - opened
@@ -22,7 +29,7 @@ concurrency:
 
 jobs:
   verify-build-deploy:
-    if: github.event_name != 'issues' || github.event.issue.title == 'Deploy COT Radar'
+    if: (github.event_name != 'issues' || github.event.issue.title == 'Deploy COT Radar') && (github.event_name != 'pull_request' || github.head_ref == 'codex/deploy-cot-radar')
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}cot-radar/
