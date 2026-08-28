@@ -9,9 +9,13 @@ export type RadarState =
   | string;
 
 export interface Evidence {
-  facts: string | string[];
-  rule: string;
-  inference: string;
+  objective_facts?: string;
+  rule_classification?: string;
+  market_inference?: string;
+  alternative_explanations?: string;
+  facts?: string | string[];
+  rule?: string;
+  inference?: string;
   alternatives?: string;
   alternative?: string;
   confirmation: string;
