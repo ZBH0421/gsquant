@@ -4,10 +4,15 @@ on:
   push:
     branches:
       - main
+  schedule:
+    - cron: "0 0 * * 6"
   workflow_dispatch:
+  issues:
+    types:
+      - opened
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -17,12 +22,15 @@ concurrency:
 
 jobs:
   verify-build-deploy:
+    if: github.event_name != 'issues' || github.event.issue.title == 'Deploy COT Radar'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}cot-radar/
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -33,10 +41,28 @@ jobs:
           python -m pytest projects/cot-radar/pipeline/tests -q
           python -m ruff check projects/cot-radar/pipeline/src projects/cot-radar/pipeline/tests
           python -m mypy projects/cot-radar/pipeline/src
-      - name: Generate current data
+      - name: Generate and validate current data
         env:
           ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
-        run: python -m cot_radar.cli --price-provider auto
+        run: |
+          python -m cot_radar.cli --price-provider auto
+          test -s projects/cot-radar/data/derived/dashboard.json
+          test -s projects/cot-radar/data/derived/signals.csv
+          test -s projects/cot-radar/web/public/data/status.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          dashboard = json.loads(Path("projects/cot-radar/data/derived/dashboard.json").read_text())
+          assert {market["symbol"] for market in dashboard["markets"]} == {"ES", "NQ"}
+          PY
+      - name: Commit validated weekly snapshot
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add projects/cot-radar/data/derived projects/cot-radar/web/public/data
+          git diff --cached --quiet || git commit -m "data: refresh weekly COT radar artifacts [skip ci]"
+          git push
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
