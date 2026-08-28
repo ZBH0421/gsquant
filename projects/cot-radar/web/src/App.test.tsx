@@ -29,14 +29,13 @@ const dashboard = {
       proxy_close: 650,
       price_sma: 630,
       price_momentum: 0.02,
-      narrative: {
-        facts: ["槓桿基金淨部位位於第 96.4 百分位。"],
-        rule: "LONG EXTREME",
-        inference: "多頭部位擁擠。",
-        alternative: "換月也可能造成部位變化。",
+      evidence: {
+        objective_facts: "截至 2026-08-18，ES 槓桿基金淨部位位於第 96.4 百分位。",
+        rule_classification: "LONG EXTREME",
+        market_inference: "多頭部位擁擠。",
+        alternative_explanations: "換月也可能造成部位變化。",
         confirmation: "部位鬆動且價格跌破均線可提高可信度。",
-        invalidation: "部位重新增加且價格創高則撤銷。",
-        evidence: [{ metric: "leveraged_percentile", value: 96.4, source: "CFTC" }]
+        invalidation: "部位重新增加且價格創高則撤銷。"
       },
       note: null
     },
@@ -55,14 +54,13 @@ const dashboard = {
       proxy_close: 580,
       price_sma: 570,
       price_momentum: 0.01,
-      narrative: {
-        facts: ["槓桿基金淨部位接近歷史中位數。"],
-        rule: "NORMAL",
-        inference: "尚無極端擁擠。",
-        alternative: "彙總分類不代表單一基金方向。",
+      evidence: {
+        objective_facts: "槓桿基金淨部位接近歷史中位數。",
+        rule_classification: "NORMAL",
+        market_inference: "尚無極端擁擠。",
+        alternative_explanations: "彙總分類不代表單一基金方向。",
         confirmation: "等待部位進入極端區。",
-        invalidation: "目前無反轉推論。",
-        evidence: []
+        invalidation: "目前無反轉推論。"
       },
       note: null
     }
@@ -98,6 +96,7 @@ describe("COT Radar", () => {
     expect(screen.getByText("E-mini Nasdaq-100")).toBeInTheDocument();
     expect(screen.getByText("EXTREME")).toBeInTheDocument();
     expect(screen.getByText("客觀事實")).toBeInTheDocument();
+    expect(screen.getByText(/截至 2026-08-18，ES 槓桿基金/)).toBeInTheDocument();
     expect(screen.getByText("確認與失效條件")).toBeInTheDocument();
     expect(screen.getByText(/SPY.*代理/)).toBeInTheDocument();
   });
