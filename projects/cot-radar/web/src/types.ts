@@ -32,6 +32,7 @@ export interface SubjectiveNote {
 export interface MarketSnapshot {
   symbol: "ES" | "NQ";
   display_name: string;
+  market_name?: string;
   proxy_symbol: string;
   report_date: string;
   available_at?: string;
