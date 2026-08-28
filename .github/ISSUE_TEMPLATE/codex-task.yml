@@ -1,0 +1,54 @@
+name: Codex implementation task
+description: Machine-actionable implementation contract for the Codex worker.
+title: "[CODEX] "
+labels:
+  - agent:planned
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This Issue is the durable contract between the controller and the Codex worker. Complete every required field before applying `agent:ready`.
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: One concrete outcome the implementation must produce.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Files, components, data sources, and behaviors that are in scope.
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints
+      description: Security, architecture, data, compatibility, and product rules that must remain true.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Observable conditions required for controller acceptance.
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification
+      description: Exact tests, lint, type checks, builds, and runtime checks the worker must run.
+      value: |
+        - `bash scripts/codex/verify.sh`
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: Explicitly name adjacent changes the worker must not make.
+    validations:
+      required: true

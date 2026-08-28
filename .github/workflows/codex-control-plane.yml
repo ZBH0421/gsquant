@@ -1,0 +1,414 @@
+name: Codex Control Plane
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/codex-control-plane.yml
+  issues:
+    types:
+      - labeled
+  issue_comment:
+    types:
+      - created
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codex-control-${{ github.event.issue.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  bootstrap-labels:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Ensure control-plane labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh label create "agent:planned" --repo "$GITHUB_REPOSITORY" --color "6f42c1" --description "Controller is defining the task" --force
+          gh label create "agent:ready" --repo "$GITHUB_REPOSITORY" --color "0e8a16" --description "Approved for Codex dispatch" --force
+          gh label create "agent:running" --repo "$GITHUB_REPOSITORY" --color "fbca04" --description "Codex worker is executing" --force
+          gh label create "agent:review" --repo "$GITHUB_REPOSITORY" --color "1d76db" --description "Waiting for controller review" --force
+          gh label create "agent:fix-required" --repo "$GITHUB_REPOSITORY" --color "d93f0b" --description "Controller requested a Codex repair turn" --force
+          gh label create "agent:verified" --repo "$GITHUB_REPOSITORY" --color "0e8a16" --description "Controller verified implementation and CI" --force
+          gh label create "agent:done" --repo "$GITHUB_REPOSITORY" --color "5319e7" --description "Task merged and runtime verified" --force
+          gh label create "agent:blocked" --repo "$GITHUB_REPOSITORY" --color "b60205" --description "Worker or infrastructure needs attention" --force
+
+  implement:
+    if: >-
+      github.event_name == 'issues' &&
+      github.event.action == 'labeled' &&
+      github.event.label.name == 'agent:ready'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Authorize controller actor
+        id: authorize
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          set -euo pipefail
+          permission=$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$ACTOR/permission" --jq '.permission')
+          case "$permission" in
+            admin|maintain|write) ;;
+            *) echo "Actor $ACTOR has insufficient permission: $permission" >&2; exit 1 ;;
+          esac
+          echo "authorized=true" >> "$GITHUB_OUTPUT"
+
+      - name: Check out main without credentials
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Prepare dependencies before Codex
+        run: bash scripts/codex/bootstrap.sh
+
+      - name: Create worker branch and mark running
+        id: task
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          branch_name="codex/issue-${ISSUE_NUMBER}-${GITHUB_RUN_ID}"
+          git switch -c "$branch_name"
+          echo "branch=$branch_name" >> "$GITHUB_OUTPUT"
+          gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --remove-label "agent:ready" --add-label "agent:running"
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "Codex worker started on branch \`$branch_name\` (run $GITHUB_RUN_ID)."
+
+      - name: Build local Codex task prompt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          mkdir -p .codex
+          gh issue view "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --json number,title,body,comments > .codex/issue.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          issue = json.loads(Path('.codex/issue.json').read_text(encoding='utf-8'))
+          comments = '\n\n'.join(
+              f"Comment by {item['author']['login']}:\n{item['body']}"
+              for item in issue.get('comments', [])
+          )
+          prompt = f"""You are the Codex Worker for {issue['number']} in this repository.
+
+Read AGENTS.md first and obey it. You are already on a feature branch created by the trusted workflow. Do not commit, push, merge, or change GitHub state; the workflow owns handoff. Implement the approved GitHub task using TDD. Inspect existing patterns before editing. Do not modify controller-owned control-plane paths unless the Issue explicitly authorizes that scope. Run `bash scripts/codex/verify.sh` and fix task-caused failures before you finish.
+
+# Issue title
+{issue['title']}
+
+# Issue body
+{issue.get('body') or ''}
+
+# Existing issue comments
+{comments or '(none)'}
+
+Finish with a concise handoff: changed files/behavior, verification performed, and any residual limitation.
+"""
+          Path('.codex/task.md').write_text(prompt, encoding='utf-8')
+          PY
+
+      - name: Require OpenAI API secret
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if [[ -z "${OPENAI_API_KEY}" ]]; then
+            echo "OPENAI_API_KEY repository secret is required before Codex can run." >&2
+            exit 1
+          fi
+
+      - name: Run Codex implementation worker
+        id: codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          permission-profile: ":workspace"
+          safety-strategy: drop-sudo
+          prompt-file: .codex/task.md
+
+      - name: Remove local task envelope
+        run: rm -rf .codex
+
+      - name: Deterministic verification
+        run: bash scripts/codex/verify.sh
+
+      - name: Require an implementation diff
+        run: |
+          if [[ -z "$(git status --porcelain)" ]]; then
+            echo "Codex completed without producing a repository change." >&2
+            exit 1
+          fi
+
+      - name: Commit, push, and open PR after verification
+        id: handoff
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          BRANCH_NAME: ${{ steps.task.outputs.branch }}
+        run: |
+          set -euo pipefail
+          git config user.name "codex-worker[bot]"
+          git config user.email "codex-worker[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: implement issue #${ISSUE_NUMBER}"
+          gh auth setup-git
+          git push --set-upstream origin "$BRANCH_NAME"
+          cat > /tmp/codex-pr-body.md <<EOF
+          Implements #${ISSUE_NUMBER}
+
+          Implementation was produced by the Codex worker and passed \`bash scripts/codex/verify.sh\` before handoff.
+
+          Controller review and normal CI are still required before merge.
+          EOF
+          pr_url=$(gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH_NAME" --title "codex: $ISSUE_TITLE" --body-file /tmp/codex-pr-body.md)
+          echo "pr_url=$pr_url" >> "$GITHUB_OUTPUT"
+
+      - name: Return task to controller review
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          PR_URL: ${{ steps.handoff.outputs.pr_url }}
+          CODEX_FINAL_MESSAGE: ${{ steps.codex.outputs.final-message }}
+        run: |
+          set -euo pipefail
+          gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --remove-label "agent:running" --add-label "agent:review"
+          {
+            echo "Codex handoff complete: $PR_URL"
+            echo
+            echo "$CODEX_FINAL_MESSAGE"
+          } > /tmp/codex-handoff.md
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file /tmp/codex-handoff.md
+
+      - name: Mark authorized task blocked on failure
+        if: ${{ failure() && steps.authorize.outputs.authorized == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --remove-label "agent:ready" --remove-label "agent:running" 2>/dev/null || true
+          gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --add-label "agent:blocked" || true
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "Codex control-plane run $GITHUB_RUN_ID failed. Inspect the Actions log before retrying." || true
+
+  fix:
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.action == 'created' &&
+      github.event.issue.pull_request != null &&
+      startsWith(github.event.comment.body, '/codex fix')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Authorize controller actor
+        id: authorize
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          set -euo pipefail
+          permission=$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$ACTOR/permission" --jq '.permission')
+          case "$permission" in
+            admin|maintain|write) ;;
+            *) echo "Actor $ACTOR has insufficient permission: $permission" >&2; exit 1 ;;
+          esac
+          echo "authorized=true" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve and validate Codex PR branch
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          head_repo=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" --jq '.head.repo.full_name')
+          branch_name=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" --jq '.head.ref')
+          if [[ "$head_repo" != "$GITHUB_REPOSITORY" ]]; then
+            echo "Repair turns are restricted to branches in $GITHUB_REPOSITORY." >&2
+            exit 1
+          fi
+          if [[ "$branch_name" != codex/issue-* ]]; then
+            echo "Repair turns are restricted to codex/issue-* branches." >&2
+            exit 1
+          fi
+          echo "branch=$branch_name" >> "$GITHUB_OUTPUT"
+
+      - name: Check out Codex PR without credentials
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.pr.outputs.branch }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Prepare dependencies before Codex
+        run: bash scripts/codex/bootstrap.sh
+
+      - name: Mark PR repair running
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          gh pr edit "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --remove-label "agent:fix-required" 2>/dev/null || true
+          gh pr edit "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --remove-label "agent:blocked" 2>/dev/null || true
+          gh pr edit "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --add-label "agent:running"
+
+      - name: Build local Codex repair prompt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          FIX_REQUEST: ${{ github.event.comment.body }}
+        run: |
+          set -euo pipefail
+          mkdir -p .codex
+          gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json number,title,body,comments,files > .codex/pr.json
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" > .codex/reviews.json
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/comments" > .codex/review-comments.json
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          pr = json.loads(Path('.codex/pr.json').read_text(encoding='utf-8'))
+          reviews = json.loads(Path('.codex/reviews.json').read_text(encoding='utf-8'))
+          review_comments = json.loads(Path('.codex/review-comments.json').read_text(encoding='utf-8'))
+          issue_comments = '\n\n'.join(
+              f"PR comment by {item['author']['login']}:\n{item['body']}"
+              for item in pr.get('comments', [])
+          )
+          submitted_reviews = '\n\n'.join(
+              f"Review by {item.get('user', {}).get('login', 'unknown')} ({item.get('state')}):\n{item.get('body') or ''}"
+              for item in reviews
+          )
+          inline_comments = '\n\n'.join(
+              f"Inline review at {item.get('path')}:{item.get('line') or item.get('original_line')}:\n{item.get('body') or ''}"
+              for item in review_comments
+          )
+          prompt = f"""You are the Codex Worker repairing PR #{pr['number']}.
+
+Read AGENTS.md first and obey it. You are on the existing Codex feature branch. Do not commit, push, merge, or change GitHub state. Address the controller's blocking request and relevant review findings without unrelated refactoring. Use TDD for behavior fixes and run `bash scripts/codex/verify.sh` before finishing.
+
+# Controller repair command
+{os.environ['FIX_REQUEST']}
+
+# PR title
+{pr['title']}
+
+# PR body
+{pr.get('body') or ''}
+
+# PR conversation
+{issue_comments or '(none)'}
+
+# Submitted reviews
+{submitted_reviews or '(none)'}
+
+# Inline review comments
+{inline_comments or '(none)'}
+
+Finish with a concise handoff describing fixes and verification.
+"""
+          Path('.codex/task.md').write_text(prompt, encoding='utf-8')
+          PY
+
+      - name: Require OpenAI API secret
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if [[ -z "${OPENAI_API_KEY}" ]]; then
+            echo "OPENAI_API_KEY repository secret is required before Codex can run." >&2
+            exit 1
+          fi
+
+      - name: Run Codex repair worker
+        id: codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          permission-profile: ":workspace"
+          safety-strategy: drop-sudo
+          prompt-file: .codex/task.md
+
+      - name: Remove local task envelope
+        run: rm -rf .codex
+
+      - name: Deterministic verification
+        run: bash scripts/codex/verify.sh
+
+      - name: Require a repair diff
+        run: |
+          if [[ -z "$(git status --porcelain)" ]]; then
+            echo "Codex repair turn produced no repository change." >&2
+            exit 1
+          fi
+
+      - name: Commit and push repair after verification
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          BRANCH_NAME: ${{ steps.pr.outputs.branch }}
+        run: |
+          set -euo pipefail
+          git config user.name "codex-worker[bot]"
+          git config user.email "codex-worker[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: address review for PR #${PR_NUMBER}"
+          gh auth setup-git
+          git push origin HEAD:"$BRANCH_NAME"
+
+      - name: Return repaired PR to controller review
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          CODEX_FINAL_MESSAGE: ${{ steps.codex.outputs.final-message }}
+        run: |
+          set -euo pipefail
+          gh pr edit "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --remove-label "agent:running" --add-label "agent:review"
+          printf '%s\n' "$CODEX_FINAL_MESSAGE" > /tmp/codex-repair-handoff.md
+          gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file /tmp/codex-repair-handoff.md
+
+      - name: Mark authorized PR blocked on failure
+        if: ${{ failure() && steps.authorize.outputs.authorized == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          gh pr edit "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --remove-label "agent:running" 2>/dev/null || true
+          gh pr edit "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --add-label "agent:blocked" || true
+          gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body "Codex repair run $GITHUB_RUN_ID failed. Inspect the Actions log before retrying." || true
