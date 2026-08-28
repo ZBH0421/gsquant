@@ -27,8 +27,12 @@ class RadarSettings:
     extreme_high: float
     extreme_low: float
     unwind_memory_weeks: int
+    confirmation_delay_weeks: int
     price_sma_weeks: int
     price_momentum_weeks: int
+    divergence_percentile_gap: float
+    minimum_backtest_samples: int
+    publication_grace_days: int
     stale_after_days: int
     backtest_horizons: tuple[int, ...]
 
@@ -55,8 +59,12 @@ class RadarSettings:
             extreme_high=90.0,
             extreme_low=10.0,
             unwind_memory_weeks=4,
+            confirmation_delay_weeks=2,
             price_sma_weeks=10,
             price_momentum_weeks=4,
+            divergence_percentile_gap=20.0,
+            minimum_backtest_samples=10,
+            publication_grace_days=3,
             stale_after_days=10,
             backtest_horizons=(1, 4, 8, 13),
         )
@@ -67,8 +75,12 @@ class RadarSettings:
         lookback_weeks: int | None = None,
         minimum_history_weeks: int | None = None,
         unwind_memory_weeks: int | None = None,
+        confirmation_delay_weeks: int | None = None,
         price_sma_weeks: int | None = None,
         price_momentum_weeks: int | None = None,
+        divergence_percentile_gap: float | None = None,
+        minimum_backtest_samples: int | None = None,
+        publication_grace_days: int | None = None,
     ) -> RadarSettings:
         return replace(
             self,
@@ -83,6 +95,11 @@ class RadarSettings:
                 if unwind_memory_weeks is None
                 else unwind_memory_weeks
             ),
+            confirmation_delay_weeks=(
+                self.confirmation_delay_weeks
+                if confirmation_delay_weeks is None
+                else confirmation_delay_weeks
+            ),
             price_sma_weeks=(
                 self.price_sma_weeks if price_sma_weeks is None else price_sma_weeks
             ),
@@ -90,6 +107,21 @@ class RadarSettings:
                 self.price_momentum_weeks
                 if price_momentum_weeks is None
                 else price_momentum_weeks
+            ),
+            divergence_percentile_gap=(
+                self.divergence_percentile_gap
+                if divergence_percentile_gap is None
+                else divergence_percentile_gap
+            ),
+            minimum_backtest_samples=(
+                self.minimum_backtest_samples
+                if minimum_backtest_samples is None
+                else minimum_backtest_samples
+            ),
+            publication_grace_days=(
+                self.publication_grace_days
+                if publication_grace_days is None
+                else publication_grace_days
             ),
         )
 
@@ -128,8 +160,12 @@ def load_settings(path: Path) -> RadarSettings:
         extreme_high=float(signal["extreme_high"]),
         extreme_low=float(signal["extreme_low"]),
         unwind_memory_weeks=int(signal["unwind_memory_weeks"]),
+        confirmation_delay_weeks=int(signal["confirmation_delay_weeks"]),
         price_sma_weeks=int(signal["price_sma_weeks"]),
         price_momentum_weeks=int(signal["price_momentum_weeks"]),
+        divergence_percentile_gap=float(signal["divergence_percentile_gap"]),
+        minimum_backtest_samples=int(signal["minimum_backtest_samples"]),
+        publication_grace_days=int(signal["publication_grace_days"]),
         stale_after_days=int(signal["stale_after_days"]),
         backtest_horizons=tuple(int(item) for item in signal["backtest_horizons"]),
     )
@@ -139,4 +175,14 @@ def load_settings(path: Path) -> RadarSettings:
         raise DataContractError("extreme thresholds must be ordered within 0..100")
     if settings.minimum_history_weeks > settings.lookback_weeks:
         raise DataContractError("minimum history cannot exceed lookback")
+    if settings.confirmation_delay_weeks < 1:
+        raise DataContractError("confirmation delay must be at least one week")
+    if settings.unwind_memory_weeks < settings.confirmation_delay_weeks:
+        raise DataContractError("unwind memory cannot be shorter than confirmation delay")
+    if not 0 <= settings.divergence_percentile_gap <= 100:
+        raise DataContractError("divergence percentile gap must be within 0..100")
+    if settings.minimum_backtest_samples < 1:
+        raise DataContractError("minimum backtest samples must be positive")
+    if settings.publication_grace_days < 0:
+        raise DataContractError("publication grace days cannot be negative")
     return settings
