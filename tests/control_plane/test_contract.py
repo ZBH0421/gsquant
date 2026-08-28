@@ -27,6 +27,8 @@ def test_codex_workflow_has_safe_dispatch_and_handoff_contract() -> None:
         "agent:running",
         "agent:review",
         "agent:blocked",
+        "Enforce controller-owned path boundary",
+        "ALLOW_CONTROL_PLANE_CHANGES: true",
     )
     for marker in required:
         assert marker in workflow, f"workflow contract missing: {marker}"
