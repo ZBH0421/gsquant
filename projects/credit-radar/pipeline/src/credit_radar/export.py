@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import math
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -141,8 +141,8 @@ def write_artifacts(
     generated_at: datetime | None = None,
     warning: str | None = None,
 ) -> dict[str, object]:
-    generated = generated_at or datetime.now(timezone.utc)
-    generated = generated.astimezone(timezone.utc)
+    generated = generated_at or datetime.now(UTC)
+    generated = generated.astimezone(UTC)
     latest_dates = {
         key: str(source.get("latest_date", "")) for key, source in provenance.items()
     }

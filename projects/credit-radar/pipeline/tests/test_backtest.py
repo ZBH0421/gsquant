@@ -23,7 +23,9 @@ def test_event_study_uses_state_entries_and_suppresses_small_sample_win_rate() -
     four_week = next(
         row
         for row in rows
-        if row["symbol"] == "SPY" and row["state"] == "CREDIT_REVERSAL" and row["horizon_weeks"] == 4
+        if row["symbol"] == "SPY"
+        and row["state"] == "CREDIT_REVERSAL"
+        and row["horizon_weeks"] == 4
     )
 
     assert four_week["n"] == 1

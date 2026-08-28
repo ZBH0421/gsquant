@@ -31,7 +31,11 @@ def _price_confirmed(row: pd.Series, prefix: str) -> bool:
     close = _number(row, f"{prefix}_close")
     sma = _number(row, f"{prefix}_sma10w")
     momentum = _number(row, f"{prefix}_momentum_4w")
-    return all(math.isfinite(value) for value in (close, sma, momentum)) and close > sma and momentum > 0
+    return (
+        all(math.isfinite(value) for value in (close, sma, momentum))
+        and close > sma
+        and momentum > 0
+    )
 
 
 def classify_credit_states(frame: pd.DataFrame, settings: RadarSettings) -> pd.DataFrame:

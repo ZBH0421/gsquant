@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -152,7 +152,7 @@ def run_pipeline(
         backtest,
         provenance,
         settings,
-        generated_at=generated_at or datetime.now(timezone.utc),
+        generated_at=generated_at or datetime.now(UTC),
     )
     return {
         "dashboard": dashboard,

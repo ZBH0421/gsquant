@@ -34,7 +34,11 @@ def compute_credit_features(frame: pd.DataFrame, settings: RadarSettings) -> pd.
     if missing:
         raise DataContractError(f"credit data missing columns: {', '.join(missing)}")
     result = frame.copy().sort_values("date", ignore_index=True)
-    result["date"] = pd.to_datetime(result["date"], errors="coerce").dt.tz_localize(None).dt.normalize()
+    result["date"] = (
+        pd.to_datetime(result["date"], errors="coerce")
+        .dt.tz_localize(None)
+        .dt.normalize()
+    )
     for column in ("hy", "ig", "vix"):
         result[column] = pd.to_numeric(result[column], errors="coerce")
     if result[["date", "hy", "ig", "vix"]].isna().any().any():
@@ -64,7 +68,11 @@ def compute_price_features(frame: pd.DataFrame, settings: RadarSettings) -> pd.D
     if missing:
         raise DataContractError(f"price data missing columns: {', '.join(missing)}")
     result = frame[["date", "close"]].copy().sort_values("date", ignore_index=True)
-    result["date"] = pd.to_datetime(result["date"], errors="coerce").dt.tz_localize(None).dt.normalize()
+    result["date"] = (
+        pd.to_datetime(result["date"], errors="coerce")
+        .dt.tz_localize(None)
+        .dt.normalize()
+    )
     result["close"] = pd.to_numeric(result["close"], errors="coerce")
     if result.isna().any().any() or (result["close"] <= 0).any():
         raise DataContractError("price data contains invalid dates or closes")
