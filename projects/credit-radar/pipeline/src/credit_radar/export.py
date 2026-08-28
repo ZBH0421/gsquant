@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import math
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
