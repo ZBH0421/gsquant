@@ -61,16 +61,25 @@ const normalizeHistory = (data: HistoryData): HistoryRow[] => {
   return Object.values(data.markets ?? {}).flat();
 };
 
-const getEvidence = (market: MarketSnapshot): Evidence =>
-  market.evidence ??
-  market.narrative ?? {
-    facts: "本期敘事尚未產生。",
-    rule: "—",
-    inference: "—",
-    alternatives: "—",
-    confirmation: "—",
-    invalidation: "—",
+const getEvidence = (market: MarketSnapshot) => {
+  const source: Evidence = market.evidence ??
+    market.narrative ?? {
+      confirmation: "—",
+      invalidation: "—",
+    };
+  return {
+    facts: source.objective_facts ?? source.facts ?? "本期敘事尚未產生。",
+    rule: source.rule_classification ?? source.rule ?? "—",
+    inference: source.market_inference ?? source.inference ?? "—",
+    alternatives:
+      source.alternative_explanations ??
+      source.alternatives ??
+      source.alternative ??
+      "—",
+    confirmation: source.confirmation,
+    invalidation: source.invalidation,
   };
+};
 
 async function loadJson<T>(name: string): Promise<T> {
   const response = await fetch(`${import.meta.env.BASE_URL}data/${name}`);
@@ -166,7 +175,7 @@ function EvidencePanel({ market }: { market: MarketSnapshot }) {
         </article>
         <article className="evidence-item alternative">
           <span className="step">04</span>
-          <div><h3>替代解釋</h3><p>{evidence.alternatives ?? evidence.alternative}</p></div>
+          <div><h3>替代解釋</h3><p>{evidence.alternatives}</p></div>
         </article>
         <article className="evidence-item conditions">
           <span className="step">05</span>
