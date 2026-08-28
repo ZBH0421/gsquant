@@ -72,6 +72,15 @@ def test_worker_scripts_define_bootstrap_and_deterministic_verification() -> Non
         assert marker in verify, f"verification gate missing: {marker}"
 
 
+def test_bootstrap_does_not_create_false_implementation_diffs() -> None:
+    bootstrap = _read("scripts/codex/bootstrap.sh")
+    gitignore = _read(".gitignore")
+
+    assert "npm install --package-lock=false" in bootstrap
+    assert "*.egg-info/" in gitignore
+    assert "*.tsbuildinfo" in gitignore
+
+
 def test_issue_template_captures_machine_actionable_task_contract() -> None:
     template = _read(".github/ISSUE_TEMPLATE/codex-task.yml")
     for marker in (
