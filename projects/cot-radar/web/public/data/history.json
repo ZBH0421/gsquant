@@ -9260,7 +9260,7 @@
       "leveraged_percentile": 55.769230769230774,
       "asset_manager_net_pct_oi": 47.14549481909427,
       "asset_manager_percentile": 71.15384615384616,
-      "price_normalized": 1725.1626000615763
+      "price_normalized": 1736.4672215869107
     },
     {
       "symbol": "ES",
@@ -20854,7 +20854,7 @@
       "leveraged_percentile": 10.256410256410255,
       "asset_manager_net_pct_oi": 26.039330893103696,
       "asset_manager_percentile": 44.871794871794876,
-      "price_normalized": 1324.2489728766725
+      "price_normalized": 1342.3804264834207
     },
     {
       "symbol": "NQ",

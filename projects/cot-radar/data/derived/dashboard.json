@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-28T02:20:30.616549+00:00",
+  "generated_at": "2026-08-28T03:18:40.473504+00:00",
   "report_date": "2026-08-18T00:00:00",
   "markets": [
     {
@@ -40,7 +40,7 @@
       "nonreportable_weekly_change": -0.2074130284620388,
       "date": "2026-08-27T00:00:00",
       "close": 771.0999755859375,
-      "price_sma": 721.6339965820313,
+      "price_sma": 722.1359924316406,
       "price_momentum": 0.019326347682232483,
       "price_normalized": 1736.4672215869107,
       "state": "NORMAL",
@@ -95,7 +95,7 @@
       "nonreportable_weekly_change": -0.08158384205531188,
       "date": "2026-08-27T00:00:00",
       "close": 721.1099853515625,
-      "price_sma": 668.3569946289062,
+      "price_sma": 669.3309936523438,
       "price_momentum": -0.023296463902571254,
       "price_normalized": 1342.3804264834207,
       "state": "EXTREME_SHORT",
