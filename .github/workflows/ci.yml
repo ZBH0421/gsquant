@@ -25,6 +25,7 @@ jobs:
       - run: python -m pytest projects/cot-radar/pipeline/tests -q
       - run: python -m ruff check projects/cot-radar/pipeline/src projects/cot-radar/pipeline/tests
       - run: python -m mypy projects/cot-radar/pipeline/src
+      - run: python -m pytest tests/control_plane -q
 
   web:
     runs-on: ubuntu-latest
