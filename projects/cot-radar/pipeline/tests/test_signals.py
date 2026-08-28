@@ -79,7 +79,7 @@ def test_confirmed_state_falls_back_to_unwinding_when_price_confirmation_breaks(
         confirmation_delay_weeks=1,
     )
     positions = _positions([50, 92, 80, 75], [1.0, 4.0, 3.0, 2.0])
-    prices = _prices([100, 104, 103, 98, 92, 96, 101])
+    prices = _prices([100, 104, 103, 98, 96, 90, 101])
 
     result = classify_states(positions, prices, settings)
 
