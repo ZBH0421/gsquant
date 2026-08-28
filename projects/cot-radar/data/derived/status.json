@@ -1,0 +1,8 @@
+{
+  "generated_at": "2026-08-28T02:20:30.616549+00:00",
+  "latest_report_date": "2026-08-18T00:00:00",
+  "price_provider": "yahoo_finance",
+  "stale": false,
+  "stale_after_days": 10,
+  "cftc_dataset": "gpe5-46if"
+}

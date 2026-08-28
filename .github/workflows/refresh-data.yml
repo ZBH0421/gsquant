@@ -1,0 +1,46 @@
+name: Refresh COT radar data
+
+on:
+  schedule:
+    - cron: "0 0 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cot-radar-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: python -m pip install -e .
+      - name: Generate derived data
+        env:
+          ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
+        run: python -m cot_radar.cli --price-provider auto
+      - name: Validate output contract
+        run: |
+          test -s projects/cot-radar/data/derived/dashboard.json
+          test -s projects/cot-radar/data/derived/status.json
+          test -s projects/cot-radar/data/derived/signals.csv
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          dashboard = json.loads(Path("projects/cot-radar/data/derived/dashboard.json").read_text())
+          assert {market["symbol"] for market in dashboard["markets"]} == {"ES", "NQ"}
+          PY
+      - name: Keep last successful data on failure, commit only validated refresh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add projects/cot-radar/data/derived projects/cot-radar/web/public/data
+          git diff --cached --quiet || git commit -m "data: refresh weekly COT radar artifacts [skip ci]"
+          git push

@@ -1,0 +1,29 @@
+dataset:
+  id: gpe5-46if
+  base_url: https://publicreporting.cftc.gov/resource
+  page_size: 50000
+
+markets:
+  ES:
+    display_name: E-mini S&P 500
+    proxy_symbol: SPY
+    contract_patterns:
+      - E-MINI S&P 500
+      - S&P 500 CONSOLIDATED
+  NQ:
+    display_name: E-mini Nasdaq-100
+    proxy_symbol: QQQ
+    contract_patterns:
+      - NASDAQ-100
+      - NASDAQ MINI
+
+signals:
+  lookback_weeks: 156
+  minimum_history_weeks: 52
+  extreme_high: 90
+  extreme_low: 10
+  unwind_memory_weeks: 4
+  price_sma_weeks: 10
+  price_momentum_weeks: 4
+  stale_after_days: 10
+  backtest_horizons: [1, 4, 8, 13]
