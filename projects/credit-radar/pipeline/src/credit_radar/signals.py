@@ -7,7 +7,6 @@ import pandas as pd
 from credit_radar.config import RadarSettings
 from credit_radar.models import DataContractError
 
-
 STATES = (
     "NORMAL",
     "DETERIORATING",

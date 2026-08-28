@@ -2,7 +2,6 @@ from pathlib import Path
 
 from conftest import load_module
 
-
 CONFIG = Path("projects/credit-radar/config/settings.yaml")
 
 

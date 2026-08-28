@@ -8,7 +8,6 @@ import pandas as pd
 from credit_radar.config import RadarSettings
 from credit_radar.models import DataContractError
 
-
 TARGET_STATES = {"STRESSED", "EXTREME_STRESS", "CREDIT_REVERSAL", "CONFIRMED_RISK_ON"}
 PROXY_LABELS = {
     "SPY": "ES proxy (SPY), not ES settlement",

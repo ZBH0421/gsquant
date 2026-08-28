@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, UTC
 from pathlib import Path
 
 import pandas as pd
@@ -13,7 +13,6 @@ from credit_radar.providers.fred import FRED_CSV_URL, FredProvider
 from credit_radar.providers.http import HttpClient, HttpLike
 from credit_radar.providers.prices import StooqPriceProvider
 from credit_radar.signals import build_cross_asset_evidence, classify_credit_states
-
 
 SERIES = {
     "HY": "BAMLH0A0HYM2",

@@ -7,7 +7,6 @@ import pandas as pd
 from credit_radar.models import DataContractError
 from credit_radar.providers.http import HttpLike
 
-
 FRED_CSV_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv"
 
 
