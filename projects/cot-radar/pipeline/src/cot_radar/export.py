@@ -26,7 +26,9 @@ ARTIFACT_NAMES = {
 
 
 def _clean(value: Any) -> Any:
-    if isinstance(value, (pd.Timestamp,)):
+    if value is pd.NaT or value is pd.NA:
+        return None
+    if isinstance(value, pd.Timestamp):
         return None if pd.isna(value) else value.isoformat()
     if isinstance(value, np.generic):
         value = value.item()
