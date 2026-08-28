@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "macro-radar"
 version = "0.1.0"
-description = "Traceable CFTC positioning and reversal-risk research"
+description = "Traceable positioning, credit-stress, and reversal-risk research"
 requires-python = ">=3.11"
 dependencies = [
   "gs-quant==2.1.6",
@@ -27,18 +27,19 @@ dev = [
 
 [project.scripts]
 cot-radar = "cot_radar.cli:main"
+credit-radar = "credit_radar.cli:main"
 
 [tool.setuptools.packages.find]
-where = ["projects/cot-radar/pipeline/src"]
+where = ["projects/cot-radar/pipeline/src", "projects/credit-radar/pipeline/src"]
 
 [tool.pytest.ini_options]
-pythonpath = ["projects/cot-radar/pipeline/src"]
-testpaths = ["projects/cot-radar/pipeline/tests"]
+pythonpath = ["projects/cot-radar/pipeline/src", "projects/credit-radar/pipeline/src"]
+testpaths = ["projects/cot-radar/pipeline/tests", "projects/credit-radar/pipeline/tests"]
 addopts = "--strict-markers --strict-config"
 
 [tool.ruff]
 target-version = "py311"
-src = ["projects/cot-radar/pipeline/src"]
+src = ["projects/cot-radar/pipeline/src", "projects/credit-radar/pipeline/src"]
 line-length = 100
 
 [tool.ruff.lint]
@@ -48,7 +49,7 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 python_version = "3.11"
 strict = true
 warn_unused_ignores = true
-files = ["projects/cot-radar/pipeline/src"]
+files = ["projects/cot-radar/pipeline/src", "projects/credit-radar/pipeline/src"]
 
 [[tool.mypy.overrides]]
 module = ["gs_quant.*"]

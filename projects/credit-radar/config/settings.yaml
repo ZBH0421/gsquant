@@ -1,0 +1,15 @@
+percentile_lookback: 756
+percentile_minimum: 252
+deteriorating_percentile: 70.0
+stressed_percentile: 85.0
+extreme_percentile: 95.0
+spread_sma_days: 50
+spread_short_change_days: 5
+spread_medium_change_days: 20
+stress_memory_days: 60
+price_sma_weeks: 10
+price_momentum_weeks: 4
+divergence_percentile_gap: 20.0
+minimum_backtest_samples: 10
+backtest_horizons_weeks: [1, 4, 8, 13, 26]
+stale_after_days: 7
