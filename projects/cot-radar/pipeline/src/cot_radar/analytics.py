@@ -77,6 +77,7 @@ def add_position_metrics(frame: pd.DataFrame, settings: RadarSettings) -> pd.Dat
             market[f"{category}_net"] = net
             market[f"{category}_net_pct_oi"] = net_pct
             market[f"{category}_weekly_change"] = _difference(net_pct)
+            market[f"{category}_four_week_change"] = _difference(net_pct, 4)
 
             if category in {"leveraged", "asset_manager"}:
                 market[f"{category}_percentile"] = prior_percentile(
