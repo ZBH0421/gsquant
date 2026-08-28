@@ -26,7 +26,7 @@ def test_add_position_metrics_normalizes_each_market(
 ) -> None:
     rows: list[dict[str, object]] = []
     for symbol in ("ES", "NQ"):
-        for week, net in enumerate((10.0, 20.0, 30.0, 40.0)):
+        for week, net in enumerate((10.0, 20.0, 30.0, 40.0, 50.0)):
             rows.append(
                 {
                     "symbol": symbol,
@@ -34,7 +34,7 @@ def test_add_position_metrics_normalizes_each_market(
                     "open_interest": 1000.0,
                     "leveraged_long": 100.0 + net,
                     "leveraged_short": 100.0,
-                    "asset_manager_long": 300.0,
+                    "asset_manager_long": 300.0 + net,
                     "asset_manager_short": 100.0,
                     "dealer_long": 100.0,
                     "dealer_short": 120.0,
@@ -47,13 +47,16 @@ def test_add_position_metrics_normalizes_each_market(
 
     result = add_position_metrics(
         pd.DataFrame(rows),
-        settings.with_overrides(lookback_weeks=3, minimum_history_weeks=3),
+        settings.with_overrides(lookback_weeks=4, minimum_history_weeks=4),
     )
 
     latest = result.groupby("symbol").tail(1)
-    assert set(latest["leveraged_net_pct_oi"]) == {4.0}
+    assert set(latest["leveraged_net_pct_oi"]) == {5.0}
     assert set(latest["leveraged_percentile"]) == {100.0}
     assert set(latest["leveraged_weekly_change"]) == {1.0}
+    assert set(latest["leveraged_four_week_change"]) == {4.0}
+    assert set(latest["asset_manager_weekly_change"]) == {1.0}
+    assert set(latest["asset_manager_four_week_change"]) == {4.0}
 
 
 @pytest.fixture
