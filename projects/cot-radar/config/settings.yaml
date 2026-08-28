@@ -23,7 +23,11 @@ signals:
   extreme_high: 90
   extreme_low: 10
   unwind_memory_weeks: 4
+  confirmation_delay_weeks: 2
   price_sma_weeks: 10
   price_momentum_weeks: 4
+  divergence_percentile_gap: 20
+  minimum_backtest_samples: 10
+  publication_grace_days: 3
   stale_after_days: 10
   backtest_horizons: [1, 4, 8, 13]
