@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-05T02:00:53.512256+00:00",
-  "latest_report_date": "2026-09-01T00:00:00",
+  "generated_at": "2026-09-12T02:09:18.075396+00:00",
+  "latest_report_date": "2026-09-08T00:00:00",
   "price_provider": "yahoo_finance",
   "stale": false,
   "stale_after_days": 10,
