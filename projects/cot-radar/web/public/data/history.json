@@ -9304,7 +9304,7 @@
       "leveraged_percentile": 47.43589743589743,
       "asset_manager_net_pct_oi": 46.02447021129859,
       "asset_manager_percentile": 62.82051282051282,
-      "price_normalized": 1706.5841341924702
+      "price_normalized": 1717.325771903589
     },
     {
       "symbol": "ES",
@@ -9315,7 +9315,7 @@
       "leveraged_percentile": 45.51282051282051,
       "asset_manager_net_pct_oi": 45.03339829584041,
       "asset_manager_percentile": 56.41025641025641,
-      "price_normalized": 1721.1315479855734
+      "price_normalized": null
     },
     {
       "symbol": "ES",
@@ -9326,7 +9326,18 @@
       "leveraged_percentile": 39.1025641025641,
       "asset_manager_net_pct_oi": 43.389220107851116,
       "asset_manager_percentile": 37.82051282051282,
-      "price_normalized": 1721.1315479855734
+      "price_normalized": 1715.276571296622
+    },
+    {
+      "symbol": "ES",
+      "report_date": "2026-09-15T00:00:00",
+      "state": "NORMAL",
+      "extreme_direction": null,
+      "leveraged_net_pct_oi": -12.556808069061216,
+      "leveraged_percentile": 81.41025641025641,
+      "asset_manager_net_pct_oi": 36.50913559924006,
+      "asset_manager_percentile": 10.897435897435898,
+      "price_normalized": 1715.276571296622
     },
     {
       "symbol": "NQ",
@@ -20931,7 +20942,7 @@
       "leveraged_percentile": 49.358974358974365,
       "asset_manager_net_pct_oi": 24.24475225754751,
       "asset_manager_percentile": 32.05128205128205,
-      "price_normalized": 1319.2600394488074
+      "price_normalized": 1334.5805382853403
     },
     {
       "symbol": "NQ",
@@ -20942,7 +20953,7 @@
       "leveraged_percentile": 83.97435897435898,
       "asset_manager_net_pct_oi": 23.9478243486373,
       "asset_manager_percentile": 27.564102564102566,
-      "price_normalized": 1330.783022469459
+      "price_normalized": null
     },
     {
       "symbol": "NQ",
@@ -20953,7 +20964,18 @@
       "leveraged_percentile": 60.89743589743589,
       "asset_manager_net_pct_oi": 25.588935832844882,
       "asset_manager_percentile": 40.38461538461539,
-      "price_normalized": 1330.783022469459
+      "price_normalized": 1343.013402595986
+    },
+    {
+      "symbol": "NQ",
+      "report_date": "2026-09-15T00:00:00",
+      "state": "UNWINDING_SHORT",
+      "extreme_direction": "short",
+      "leveraged_net_pct_oi": -1.9605014365346365,
+      "leveraged_percentile": 89.1025641025641,
+      "asset_manager_net_pct_oi": 20.507759742651572,
+      "asset_manager_percentile": 14.743589743589745,
+      "price_normalized": 1343.013402595986
     }
   ]
 }
