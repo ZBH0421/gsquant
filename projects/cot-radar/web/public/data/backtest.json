@@ -57,7 +57,7 @@
       "horizon_weeks": 4,
       "sample_count": 5,
       "median_forward_return": 0.024064503067608767,
-      "reversal_win_rate": 0.6,
+      "reversal_win_rate": 0.8,
       "median_max_adverse_excursion": 0.018384745742481723
     },
     {
@@ -217,8 +217,8 @@
       "horizon_weeks": 4,
       "sample_count": 37,
       "median_forward_return": 0.03224157262472982,
-      "reversal_win_rate": 0.7297297297297297,
-      "median_max_adverse_excursion": 0.018384745742481723
+      "reversal_win_rate": 0.7567567567567568,
+      "median_max_adverse_excursion": 0.01819820167377162
     },
     {
       "symbol": "ES",
@@ -5982,7 +5982,7 @@
       "available_date": "2025-09-05T00:00:00",
       "horizon_weeks": 13,
       "baseline_date": "2025-10-01T00:00:00",
-      "forward_return": 0.07804295906413605,
+      "forward_return": 0.1060170627473016,
       "reversal_win": true,
       "max_adverse_excursion": 0.04650612969044565
     },
@@ -6026,7 +6026,7 @@
       "available_date": "2025-09-12T00:00:00",
       "horizon_weeks": 13,
       "baseline_date": "2025-10-01T00:00:00",
-      "forward_return": 0.07804295906413605,
+      "forward_return": 0.1060170627473016,
       "reversal_win": true,
       "max_adverse_excursion": 0.04650612969044565
     },
@@ -6070,7 +6070,7 @@
       "available_date": "2025-09-19T00:00:00",
       "horizon_weeks": 13,
       "baseline_date": "2025-10-01T00:00:00",
-      "forward_return": 0.07804295906413605,
+      "forward_return": 0.1060170627473016,
       "reversal_win": true,
       "max_adverse_excursion": 0.04650612969044565
     },
@@ -6114,7 +6114,7 @@
       "available_date": "2025-09-26T00:00:00",
       "horizon_weeks": 13,
       "baseline_date": "2025-10-01T00:00:00",
-      "forward_return": 0.07804295906413605,
+      "forward_return": 0.1060170627473016,
       "reversal_win": true,
       "max_adverse_excursion": 0.04650612969044565
     },
@@ -6367,7 +6367,7 @@
       "available_date": "2026-03-06T00:00:00",
       "horizon_weeks": 8,
       "baseline_date": "2026-04-01T00:00:00",
-      "forward_return": 0.023140296530008708,
+      "forward_return": 0.04968973270683952,
       "reversal_win": true,
       "max_adverse_excursion": 0.0
     },
@@ -6444,9 +6444,9 @@
       "available_date": "2026-06-12T00:00:00",
       "horizon_weeks": 4,
       "baseline_date": "2026-07-01T00:00:00",
-      "forward_return": -0.015715634993390126,
-      "reversal_win": false,
-      "max_adverse_excursion": 0.015715634993390126
+      "forward_return": 0.009825529807979905,
+      "reversal_win": true,
+      "max_adverse_excursion": 0.0
     },
     {
       "symbol": "ES",
@@ -6488,9 +6488,9 @@
       "available_date": "2026-06-26T00:00:00",
       "horizon_weeks": 4,
       "baseline_date": "2026-07-01T00:00:00",
-      "forward_return": -0.015715634993390126,
-      "reversal_win": false,
-      "max_adverse_excursion": 0.015715634993390126
+      "forward_return": 0.009825529807979905,
+      "reversal_win": true,
+      "max_adverse_excursion": 0.0
     },
     {
       "symbol": "ES",
@@ -6532,9 +6532,9 @@
       "available_date": "2026-07-03T00:00:00",
       "horizon_weeks": 4,
       "baseline_date": "2026-08-01T00:00:00",
-      "forward_return": -0.041405397654731724,
+      "forward_return": -0.01653085571680324,
       "reversal_win": false,
-      "max_adverse_excursion": 0.041405397654731724
+      "max_adverse_excursion": 0.01653085571680324
     },
     {
       "symbol": "ES",
@@ -6652,7 +6652,7 @@
       "extreme_direction": "short",
       "available_date": "2026-11-06T00:00:00",
       "horizon_weeks": 1,
-      "baseline_date": "2026-11-06T00:00:00",
+      "baseline_date": "2026-11-13T00:00:00",
       "forward_return": null,
       "reversal_win": null,
       "max_adverse_excursion": null
@@ -6663,7 +6663,7 @@
       "extreme_direction": "short",
       "available_date": "2026-11-06T00:00:00",
       "horizon_weeks": 4,
-      "baseline_date": "2026-11-06T00:00:00",
+      "baseline_date": "2026-11-13T00:00:00",
       "forward_return": null,
       "reversal_win": null,
       "max_adverse_excursion": null
@@ -6674,7 +6674,7 @@
       "extreme_direction": "short",
       "available_date": "2026-11-06T00:00:00",
       "horizon_weeks": 8,
-      "baseline_date": "2026-11-06T00:00:00",
+      "baseline_date": "2026-11-13T00:00:00",
       "forward_return": null,
       "reversal_win": null,
       "max_adverse_excursion": null
@@ -6685,7 +6685,7 @@
       "extreme_direction": "short",
       "available_date": "2026-11-06T00:00:00",
       "horizon_weeks": 13,
-      "baseline_date": "2026-11-06T00:00:00",
+      "baseline_date": "2026-11-13T00:00:00",
       "forward_return": null,
       "reversal_win": null,
       "max_adverse_excursion": null
@@ -14474,7 +14474,7 @@
       "available_date": "2025-10-03T00:00:00",
       "horizon_weeks": 13,
       "baseline_date": "2025-11-01T00:00:00",
-      "forward_return": 0.05950742928693975,
+      "forward_return": 0.09792493281943893,
       "reversal_win": false,
       "max_adverse_excursion": 0.1946225587908761
     },
@@ -14584,9 +14584,9 @@
       "available_date": "2026-07-03T00:00:00",
       "horizon_weeks": 4,
       "baseline_date": "2026-08-01T00:00:00",
-      "forward_return": -0.08463088530779339,
+      "forward_return": -0.051439804976345815,
       "reversal_win": false,
-      "max_adverse_excursion": 0.08463088530779339
+      "max_adverse_excursion": 0.051439804976345815
     },
     {
       "symbol": "NQ",
@@ -14628,9 +14628,9 @@
       "available_date": "2026-07-10T00:00:00",
       "horizon_weeks": 4,
       "baseline_date": "2026-08-01T00:00:00",
-      "forward_return": -0.08463088530779339,
+      "forward_return": -0.051439804976345815,
       "reversal_win": false,
-      "max_adverse_excursion": 0.08463088530779339
+      "max_adverse_excursion": 0.051439804976345815
     },
     {
       "symbol": "NQ",
@@ -14672,9 +14672,9 @@
       "available_date": "2026-07-17T00:00:00",
       "horizon_weeks": 4,
       "baseline_date": "2026-08-01T00:00:00",
-      "forward_return": -0.08463088530779339,
+      "forward_return": -0.051439804976345815,
       "reversal_win": false,
-      "max_adverse_excursion": 0.08463088530779339
+      "max_adverse_excursion": 0.051439804976345815
     },
     {
       "symbol": "NQ",
@@ -14716,9 +14716,9 @@
       "available_date": "2026-07-31T00:00:00",
       "horizon_weeks": 4,
       "baseline_date": "2026-08-01T00:00:00",
-      "forward_return": -0.08463088530779339,
+      "forward_return": -0.051439804976345815,
       "reversal_win": false,
-      "max_adverse_excursion": 0.08463088530779339
+      "max_adverse_excursion": 0.051439804976345815
     },
     {
       "symbol": "NQ",
@@ -14837,9 +14837,9 @@
       "available_date": "2026-09-18T00:00:00",
       "horizon_weeks": 1,
       "baseline_date": "2026-10-01T00:00:00",
-      "forward_return": -0.04980523271128723,
+      "forward_return": -0.015351381969113675,
       "reversal_win": false,
-      "max_adverse_excursion": 0.04980523271128723
+      "max_adverse_excursion": 0.015351381969113675
     },
     {
       "symbol": "NQ",
